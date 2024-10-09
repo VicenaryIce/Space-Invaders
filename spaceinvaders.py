@@ -5,16 +5,23 @@ pygame.init()
 screen = pygame.display.set_mode((600, 600))
 pygame.display.set_caption('Hello World!')
 
-
-space = pygame.transform.scale(pygame.image.load('space.png'),(600,600))
-red = pygame.transform.rotate(pygame.transform.scale(pygame.image.load('redship.png'),(50,50)),90)
-yellow = pygame.transform.rotate(pygame.transform.scale(pygame.image.load('yellowship.png'),(50,50)),-90)
-
+font = pygame.font.SysFont('sans',50)
+space = pygame.transform.scale(pygame.image.load('Gamedev2/SPACEINVADERS/space.png'),(600,600))
+red = pygame.transform.rotate(pygame.transform.scale(pygame.image.load('Gamedev2/SPACEINVADERS/redship.png'),(50,50)),90)
+yellow = pygame.transform.rotate(pygame.transform.scale(pygame.image.load('Gamedev2/SPACEINVADERS/yellowship.png'),(50,50)),-90)
+redhealth  = 10
+yellowhealth = 10
 border = pygame.Rect(290,0,20,600)
+redbullets = []
+yellowbullets = []
 
 redrect = pygame.Rect(50,300,50,50)
 yellowrect = pygame.Rect(500,300,50,50)
 
+Redgetshit = pygame.USEREVENT
+#print(Redhit)
+
+Yellowgetshit = pygame.USEREVENT+1
 
 def movement():
     keypress = pygame.key.get_pressed()
@@ -40,18 +47,62 @@ def loadscreen():
     screen.blit(space,(0,0))
     screen.blit(red,(redrect.x,redrect.y))
     screen.blit(yellow,(yellowrect.x,yellowrect.y))
+    redhealthbar = font.render('Health = '+ str(redhealth),True,'white')
+    screen.blit(redhealthbar,(0,0))
+    yellowhealthbar = font.render('Health = ' +str(yellowhealth),True,'white')
+    screen.blit(yellowhealthbar, (320,0))
     pygame.draw.rect(screen,'white',border)
+    for i in redbullets:
+        pygame.draw.rect(screen,'red',i)
+    for i in yellowbullets:
+            pygame.draw.rect(screen,'yellow',i)
+
+
+
+
+def bulletmovement():
+    for i in redbullets:
+        i.x = i.x+5
+        if i.x >600:
+            redbullets.remove(i)
+        if yellowrect.colliderect(i):
+            pygame.event.post(pygame.event.Event(Yellowgetshit))#Creating event using this code, 
+            #and then you make it usable
+            redbullets.remove(i)
+    for i in yellowbullets:
+        i.x = i.x-5
+        if i.x <10:
+            yellowbullets.remove(i)
+        if redrect.colliderect(i)
+
 
 delay = pygame.time.Clock()
 
 
+
 while True:
+    
     delay.tick(60)
     loadscreen()
     movement()
+    bulletmovement()
     for event in pygame.event.get():
         if event.type == QUIT:
             pygame.quit()
             sys.exit()
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_SPACE and len(redbullets) <3:
+                 
+                redbullet = pygame.Rect(redrect.right,redrect.y+20,10,10)
+                redbullets.append(redbullet)
+            if event.key == pygame.K_RSHIFT and len(yellowbullets) <3:
+                yellowbullet = pygame.Rect(yellowrect.left,yellowrect.y+20,10,10)
+                yellowbullets.append(yellowbullet)
+        if event.type == Yellowgetshit:
+            yellowhealth = yellowhealth-1 
+        
+            
+            
+
          
     pygame.display.update()
